@@ -1,0 +1,105 @@
+# Backend AIOps (FastAPI) : les 4 modèles en cascade, exposés en REST et en WebSocket.
+# Déployé dans le namespace monitoring, sur le nœud de monitoring (label monitoring=true,
+# taint dedicated=monitoring) : les nœuds applicatifs n'ont pas de marge mémoire suffisante.
+# Exposé en NodePort 30080, comme Prometheus (30090), Loki (30003) et Tempo (30622).
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexshop-aiops-backend
+  namespace: monitoring
+  labels:
+    app: nexshop-aiops-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nexshop-aiops-backend
+  template:
+    metadata:
+      labels:
+        app: nexshop-aiops-backend
+    spec:
+      nodeSelector:
+        monitoring: "true"
+      tolerations:
+        - key: dedicated
+          operator: Equal
+          value: monitoring
+          effect: NoSchedule
+      containers:
+        - name: backend
+          image: docker.io/mabroukamessaoudi1/nexshop-aiops-backend:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+            # Jeton optionnel pour protéger /ingest/tick (collector_final.py --platform-token).
+            # Laisser le secret absent = ingestion ouverte (pratique en démo, cf. secret.yaml
+            # ci-dessous pour l'activer).
+            - name: INGEST_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: nexshop-aiops-secrets
+                  key: ingest-token
+                  optional: true
+          resources:
+            requests:
+              cpu: "150m"
+              memory: "256Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 3
+          volumeMounts:
+            - name: uploads
+              mountPath: /app/data/uploads
+      volumes:
+        # Éphémère : les CSV uploadés via le Cockpit ne survivent pas à un redémarrage
+        # du pod. Suffisant pour une démo ; passer à un PVC si besoin de persistance.
+        - name: uploads
+          emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexshop-aiops-backend
+  namespace: monitoring
+  labels:
+    app: nexshop-aiops-backend
+spec:
+  type: NodePort
+  selector:
+    app: nexshop-aiops-backend
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      nodePort: 30080  # même convention que PROM_URL:30090 / LOKI_URL:30003 / TEMPO_URL:30622
+      protocol: TCP
+
+---
+# Optionnel : décommenter et remplir pour activer l'authentification sur /ingest/tick.
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: nexshop-aiops-secrets
+#   namespace: monitoring
+# type: Opaque
+# stringData:
+#   ingest-token: "change-moi"

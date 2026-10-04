@@ -1,0 +1,136 @@
+/* ============================================================
+   NexShop AIOps Command Center — Design tokens
+   Direction : salle de contrôle Ops réelle (type NOC), pas un
+   dashboard générique. Le rail de pipeline (voir PipelineRail)
+   est l'élément signature : un vrai circuit qui s'illumine au
+   passage du flux de données, du capteur jusqu'à la décision.
+   ============================================================ */
+
+:root {
+  /* --- Couleurs --- */
+  --ink: #090d12;
+  --panel: #10161d;
+  --panel-raised: #151d26;
+  --line: #212b35;
+  --line-bright: #2e3c49;
+
+  --signal: #4fd1c5;       /* cyan de signal — flux normal / actif */
+  --signal-dim: #1f4744;
+  --signal-glow: rgba(79, 209, 197, 0.35);
+
+  --amber: #f5a524;        /* alerte / attention */
+  --amber-dim: #4a3312;
+
+  --red: #f0453a;          /* critique */
+  --red-dim: #4a1a17;
+  --red-glow: rgba(240, 69, 58, 0.35);
+
+  --violet: #9b8cf2;       /* accent secondaire — M3 prédiction */
+  --magenta: #ff5fa2;      /* accent — phase Black Friday (démo M4) */
+
+  --text: #e8edf2;
+  --text-dim: #8b98a6;
+  --text-faint: #4d5966;
+
+  /* --- Typographie --- */
+  --font-display: "Chakra Petch", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* --- Rayon / ombres --- */
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --shadow-panel: 0 1px 0 rgba(255, 255, 255, 0.02) inset, 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--ink);
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-attachment: fixed;
+  background-position: center;
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  margin: 0;
+}
+
+code,
+.mono {
+  font-family: var(--font-mono);
+}
+
+button {
+  font-family: inherit;
+}
+
+::selection {
+  background: var(--signal-glow);
+}
+
+/* Respecte la préférence utilisateur pour moins d'animation */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Focus clavier visible partout */
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-panel);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.scrollpanel {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-bright) transparent;
+}
+.scrollpanel::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollpanel::-webkit-scrollbar-thumb {
+  background: var(--line-bright);
+  border-radius: 3px;
+}

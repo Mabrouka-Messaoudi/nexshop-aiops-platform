@@ -1,0 +1,42 @@
+{
+  "impute_zero_cols": [
+    "db_active_connections_mongo",
+    "db_query_duration_avg_ms",
+    "db_query_duration_max_ms",
+    "restart_count_delta"
+  ],
+  "impute_median": {
+    "memory_usage_pct": 34.75710227272727,
+    "jvm_heap_used_pct": 9.41008267182882,
+    "memory_working_set_bytes": 331776000.0,
+    "node_load1": 0.56,
+    "node_cpu_usage_pct": 14.571989480310904,
+    "node_memory_available_pct": 25.482792813754163,
+    "cpu_usage_pct": 13.619499887807336,
+    "gc_pause_total_sec": 9.332711152589812e-05,
+    "http_p95_latency_ms": 308.68962289236737
+  },
+  "constant_cols": [
+    "profile",
+    "waiting_reason"
+  ],
+  "onehot_cols": [
+    "exception_signature",
+    "last_terminated_reason"
+  ],
+  "onehot_categories": {
+    "exception_signature": [
+      "client_error",
+      "connection_lost",
+      "none"
+    ],
+    "last_terminated_reason": [
+      "Error",
+      "OOMKilled",
+      "none"
+    ]
+  },
+  "metadata_no_impute": [
+    "node_name"
+  ]
+}

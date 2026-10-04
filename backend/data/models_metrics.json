@@ -1,0 +1,72 @@
+{
+  "M1": {
+    "name": "Isolation Forest / LOF — Détection d'anomalie",
+    "model_chosen": "Local Outlier Factor (LOF)",
+    "reason_chosen": "Meilleur rappel moyen que Isolation Forest au seuil P99 du train, sur vérité terrain corrigée",
+    "threshold_method": "99e percentile du score d'anomalie sur le train (trafic 100% normal)",
+    "temporal_smoothing": "Fenêtre glissante centrée = 3 points, vote majoritaire pour oom/crashloop, max pour cpu_throttle/db_down",
+    "recall_by_fault_type_pct": {
+      "crashloop": 100.0,
+      "oom": 98.4,
+      "cpu_throttle": 98.0,
+      "db_down": 88.0
+    },
+    "false_positive_rate_neighbor_pod_pct": null,
+    "notes": "Modèle non supervisé : jamais entraîné sur des pannes, seulement sur trafic normal (14 services, 3 profils : normal/high/blackfriday)."
+  },
+  "M2": {
+    "name": "Gradient Boosting — Classification de panne",
+    "model_chosen": "Gradient Boosting Classifier",
+    "comparison_vs_alternatives": {
+      "Régression Logistique": {"accuracy": 0.9505, "f1_macro": 0.9582},
+      "Random Forest": {"accuracy": 0.9753, "f1_macro": 0.9783},
+      "Gradient Boosting": {"accuracy": 0.9859, "f1_macro": 0.9866}
+    },
+    "final_accuracy_pct": 98.6,
+    "final_f1_macro_pct": 98.7,
+    "per_class_f1_pct": {
+      "cpu_throttle": 99.1,
+      "crashloop": 100.0,
+      "db_down": 96.1,
+      "none": 98.1,
+      "oom": 100.0
+    },
+    "test_set_size": 283,
+    "split_method": "Split au niveau run (pas au niveau ligne) pour éviter toute fuite entre train et test",
+    "notes": "6 colonnes à fuite de données identifiées et retirées avant entraînement. Live crashloop injection test : 100% accuracy confirmée hors échantillon."
+  },
+  "M3": {
+    "name": "Gradient Boosting quantile — Prédiction Time-To-Failure (OOM)",
+    "model_chosen": "2 modèles Gradient Boosting à perte quantile (médiane alpha=0.5 pour affichage, alpha=0.3 pour alerte)",
+    "point_model_mae_sec": 58.9,
+    "point_model_r2": 0.555,
+    "alert_threshold_sec": 120,
+    "alert_recall_by_alpha": {
+      "0.5 (ancien modèle, perte quadratique équivalente)": 0.625,
+      "0.3 (modèle sécurité retenu)": 0.867,
+      "0.25": 0.914,
+      "0.2": 0.930
+    },
+    "demo_scenarios": [
+      {"scenario": "Budget mémoire serré (200Mi), croissance rapide", "lead_time_sec": 63, "result": "succès"},
+      {"scenario": "Budget mémoire large (350Mi), croissance lente", "lead_time_sec": 352, "result": "succès (seuil statique rate tout)"}
+    ],
+    "validation_method": "LORO CV (Leave-One-Run-Out), 28 runs",
+    "notes": "Itération méthodologique clé : le modèle initial (perte quadratique) sous-estimait le risque et ratait des alertes. Correction par régression quantile avec séparation affichage/décision."
+  },
+  "M4": {
+    "name": "ARIMA — Seuils dynamiques",
+    "model_chosen": "ARIMA réajusté en continu sur fenêtre glissante de 15 minutes (ordre choisi automatiquement parmi 4 candidats via AIC)",
+    "confidence_interval": "95%",
+    "false_alarm_rate_fixed_threshold_pct": 58.8,
+    "false_alarm_rate_arima_pct": 4.8,
+    "improvement_factor": 12.2,
+    "in_sample_coverage_pct": 95.1,
+    "demo_scenario_result": {
+      "alerts_during_legitimate_ramp_up": 0,
+      "alerts_during_synthetic_spike": "détecté",
+      "alerts_during_recovery": "quasi nul"
+    },
+    "notes": "Comparaison faite sur 15 services x plusieurs runs (normal/high/blackfriday). Le seuil fixe génère 55-73% de fausses alertes selon le service pendant les pics de trafic légitimes ; l'ARIMA glissant les réduit à ~5%."
+  }
+}

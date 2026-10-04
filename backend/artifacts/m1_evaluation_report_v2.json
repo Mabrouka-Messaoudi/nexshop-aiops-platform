@@ -1,0 +1,51 @@
+{
+  "methodology": "v2 : v\u00e9rit\u00e9 terrain corrig\u00e9e pour oom/crashloop (label='none' si le pod n'a jamais r\u00e9ellement red\u00e9marr\u00e9 pendant during_fault, cf. 6.1). cpu_throttle et db_down non corrig\u00e9s (pas de signal de red\u00e9marrage fiable) -- limite connue. Seuil toujours cal\u00e9 sur les percentiles du train (inchang\u00e9). Post-traitement : filtre de confiance metrics_missing_ratio (>0.3 ignor\u00e9) + lissage par vote majoritaire (>=2/3), en compl\u00e9ment du lissage par max (v1).",
+  "pct_mislabeled_oom_crashloop": 29.35323383084577,
+  "excluded_pre_fault_rows": 406,
+  "n_during_fault_rows": 1095,
+  "chosen_percentile": 99,
+  "chosen_model": "LOF",
+  "chosen_threshold": 1.3091511357635204,
+  "recall_by_fault_type_corrected": {
+    "crashloop": 100.0,
+    "oom": 98.4,
+    "cpu_throttle": 98.0,
+    "db_down": 88.0
+  },
+  "fp_rate_pod_voisin_pct": 85.87570621468926,
+  "post_processing_comparison": {
+    "cpu_throttle": {
+      "rappel_avant_%": 98.0,
+      "rappel_v1_max_%": 100.0,
+      "rappel_v2_filtre+vote_%": 61.0,
+      "rappel_FINAL_%": 100.0
+    },
+    "crashloop": {
+      "rappel_avant_%": 100.0,
+      "rappel_v1_max_%": 100.0,
+      "rappel_v2_filtre+vote_%": 100.0,
+      "rappel_FINAL_%": 100.0
+    },
+    "db_down": {
+      "rappel_avant_%": 88.0,
+      "rappel_v1_max_%": 92.7,
+      "rappel_v2_filtre+vote_%": 85.4,
+      "rappel_FINAL_%": 92.7
+    },
+    "oom": {
+      "rappel_avant_%": 98.4,
+      "rappel_v1_max_%": 100.0,
+      "rappel_v2_filtre+vote_%": 100.0,
+      "rappel_FINAL_%": 100.0
+    },
+    "MOYENNE": {
+      "rappel_avant_%": 96.1,
+      "rappel_v1_max_%": 98.175,
+      "rappel_v2_filtre+vote_%": 86.6,
+      "rappel_FINAL_%": 98.175
+    }
+  },
+  "post_processing_policy": "v2 (filtre+vote) pour oom/crashloop, v1 (max) pour cpu_throttle/db_down",
+  "fp_rate_pod_voisin_final_pct": 11.864406779661017,
+  "fpr_nominal_train_v1_max_pct": 1.936260885677228
+}
